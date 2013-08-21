@@ -1,5 +1,6 @@
 package com.danwink.tacticrail;
 
+import com.phyloa.dlib.dui.AWTComponentEventMapper;
 import com.phyloa.dlib.renderer.DScreenHandler;
 import com.phyloa.dlib.renderer.Graphics2DRenderer;
 
@@ -13,7 +14,7 @@ public class RailClient extends Graphics2DRenderer
 	{
 		dsh = new DScreenHandler<RailClient, Graphics2DRenderer>();
 		
-		dsh.register( "home", new HomeScreen() );
+		dsh.register( "home", new HomeScreen( this ) );
 		dsh.register( "play", new GameScreen() );
 	}
 	

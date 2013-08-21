@@ -14,6 +14,8 @@ public class RailServer
 	
 	RailMap map;
 	
+	ServerLoop sl;
+	
 	public RailServer()
 	{
 		
@@ -27,7 +29,7 @@ public class RailServer
 		RailClassRegisterer.register( server );
 		server.start( 31456, 31457 );
 		
-		Thread t = new Thread( new ServerLoop() );
+		Thread t = new Thread( sl = new ServerLoop() );
 		t.start();
 	}
 	
