@@ -1,39 +1,67 @@
 package com.danwink.tacticrail;
 
+import java.awt.Color;
+import java.awt.RenderingHints;
+
+import com.danwink.dngf.DNGFClient;
 import com.phyloa.dlib.dui.AWTComponentEventMapper;
 import com.phyloa.dlib.renderer.DScreenHandler;
 import com.phyloa.dlib.renderer.Graphics2DRenderer;
 
-public class RailClient extends Graphics2DRenderer
+public class RailClient extends DNGFClient<RailMessageType>
 {
-	DScreenHandler<RailClient, Graphics2DRenderer> dsh;
+	RailMap map;
 	
-	RailServer server;
+	ZoomTransform zt;
 	
 	public RailClient()
 	{
-		dsh = new DScreenHandler<RailClient, Graphics2DRenderer>();
-		
-		dsh.register( "home", new HomeScreen( this ) );
-		dsh.register( "play", new GameScreen() );
+		addClasses( RailClassRegisterer.classes );
 	}
 	
-	public void initialize() 
+	public void setup()
 	{
-		size( 800, 600 );
-		
-		dsh.activate( "home", this );
+
 	}
 
-	public void update()
+	public void handleMessage( RailMessageType type, Object o )
 	{
-		dsh.update( this, 10 );
-		dsh.render( this, this );
+		switch( type )
+		{
+		case MAP:
+			map = (RailMap)o;
+		}
+	}
+
+	public void update( float d )
+	{
+		if( zt == null )
+		{
+			zt = new ZoomTransform( canvas );
+			canvas.addMouseListener( zt );
+			canvas.addMouseMotionListener( zt );
+			canvas.addMouseWheelListener( zt );
+		}
+		
+		color( Color.white );
+		fillRect( 0, 0, getWidth(), getHeight() );
+		
+		pushMatrix();
+		g.transform( zt.getCoordTransform() );
+		if( map != null )
+		{
+			pushMatrix();
+			scale( .5f, .5f );
+			map.render( this );
+			popMatrix();
+		}
+		popMatrix();
 	}
 	
 	public static void main( String[] args )
 	{
 		RailClient rc = new RailClient();
+		rc.setServerClass( RailServer.class );
 		rc.begin();
 	}
 }

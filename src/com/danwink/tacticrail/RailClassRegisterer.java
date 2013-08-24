@@ -8,24 +8,23 @@ import com.phyloa.dlib.network.ClassRegister;
 
 public class RailClassRegisterer 
 {
-	public static void register( ClassRegister c )
+	public static Class[] classes = 
 	{
-		c.register( RailMessage.class );
-		c.register( RailMessage.RailMessageType.class );
+		RailMessageType.class,
 		
-		c.register( Point.class );
-		c.register( Point.PointType.class );
-		c.register( Point[].class );
-		c.register( Point[][].class );
+		Point.class,
+		Point.PointType.class,
+		Point[].class,
+		Point[][].class,
 		
-		c.register( RailMap.class );
-		c.register( Border.class );
-		c.register( Border.BorderType.class );
+		RailMap.class,
+		Border.class,
+		Border.BorderType.class,
 		
-		c.register( Player.class );
+		Player.class,
 		
-		c.register( ArrayList.class );
+		ArrayList.class,
 		
-		c.register( Point2f.class );
-	}
+		Point2f.class,
+	};
 }

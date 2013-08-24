@@ -1,6 +1,9 @@
 package com.danwink.tacticrail;
 
 import java.awt.Polygon;
+import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
+import java.util.ArrayList;
 
 import javax.vecmath.Point2f;
 
@@ -12,34 +15,73 @@ public class RailMapGen
 {
 	public static RailMap map1()
 	{
-		RailMap map = new RailMap( 20, 20 );
-		Polygon p = new Polygon();
+		RailMap map = new RailMap( 50, 50 );
+		
+		ArrayList<Polygon> polys = new ArrayList<Polygon>();
+		
+		for( int i = 0; i < 10; i++ )
+		{
+			float xc =  map.getWidth()/2 + DMath.randomf( -map.getWidth()/3, map.getWidth()/3 );
+			float yc =  map.getHeight()/2 + DMath.randomf( -map.getHeight()/3, map.getHeight()/3 );
+			Polygon p = new Polygon();
+			for( float a = 0; a < DMath.PI2F; a += DMath.PIF / 6 + .00001f )
+			{
+				float mag = DMath.randomf( .5f, .8f );
+				float x = xc + DMath.cosf( a ) * mag * 600;
+				float y = yc + DMath.sinf( a ) * mag * 600;
+				p.addPoint( (int)(x*1000), (int)(y*1000) );
+			}
+			
+			polys.add( p );
+		}
+		
+		
+		Area a = new Area( polys.get( 0 ) );
+		for( int i = 1; i < polys.size(); i++ )
+		{
+			a.add( new Area( polys.get( i ) ) );
+		}
+		
+		PathIterator pi = a.getPathIterator( null );
+		
 		Border b = new Border();
 		b.type = BorderType.NORMAL;
 		
-		for( float a = 0; a < DMath.PI2F; a += DMath.PIF / 6 + .00001f )
+		do
 		{
-			float mag = DMath.randomf( .5f, .8f );
-			float x = DMath.cosf( a ) * mag * (map.getWidth()/2) + map.getWidth()/2;
-			float y = DMath.sinf( a ) * mag * (map.getHeight()/2) + map.getHeight()/2;
-			b.points.add( new Point2f( x, y ) );
-			p.addPoint( (int)(x*1000), (int)(y*1000) );
-		}
+			float[] f = new float[6];
+			int type = pi.currentSegment( f );
+			if( type != PathIterator.SEG_CLOSE )
+			{
+				if( type == PathIterator.SEG_MOVETO && b.points.size() > 0 )
+				{
+					map.borders.add( b );
+					b.points.add( b.points.get( 0 ) );
+					b = new Border();
+					b.type = BorderType.NORMAL;
+				}
+				else
+				{
+					b.points.add( new Point2f( f[0]/1000.f, f[1]/1000.f ) );
+				}
+			}
+			
+			pi.next();
+		} while( !pi.isDone() );
 		
+		map.borders.add( b );
 		b.points.add( b.points.get( 0 ) );
 		
 		for( int y = 0; y < map.pointMap[0].length; y++ )
 		{
 			for( int x = 0; x < map.pointMap.length; x++ )
 			{
-				if( !p.contains( map.getPX( x, y )*1000, map.getPY( x, y )*1000 ) )
+				if( !a.contains( map.getPX( x, y )*1000, map.getPY( x, y )*1000 ) )
 				{
 					map.pointMap[x][y].type = PointType.NONE;
 				}
 			}
 		}
-		
-		map.borders.add( b );
 		
 		return map;
 	}
