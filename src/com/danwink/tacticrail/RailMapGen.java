@@ -83,6 +83,19 @@ public class RailMapGen
 			}
 		}
 		
+		int added = 0;
+		while( added < 10 )
+		{
+			int x = DMath.randomi( 0, 49 );
+			int y = DMath.randomi( 0, 49 );
+			
+			if( map.pointMap[x][y].type == PointType.NORMAL )
+			{
+				map.pointMap[x][y].type = PointType.SMALLCITY;
+				added++;
+			}
+		}
+		
 		return map;
 	}
 }

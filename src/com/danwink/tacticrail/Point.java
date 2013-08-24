@@ -30,6 +30,11 @@ public class Point
 			g.color( Color.black );
 			g.g.fill( triangle );
 			break;
+		case SMALLCITY:
+			g.color( Color.red );
+			g.fillOval( -4, -4, 8, 8 );
+			g.color( Color.black );
+			g.drawOval( -4, -4, 8, 8 );
 		}
 	}
 	

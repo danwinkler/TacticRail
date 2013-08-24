@@ -2,6 +2,10 @@ package com.danwink.tacticrail;
 
 import java.awt.Color;
 import java.awt.RenderingHints;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
+
+import javax.vecmath.Point2i;
 
 import com.danwink.dngf.DNGFClient;
 import com.phyloa.dlib.dui.AWTComponentEventMapper;
@@ -50,11 +54,22 @@ public class RailClient extends DNGFClient<RailMessageType>
 		g.transform( zt.getCoordTransform() );
 		if( map != null )
 		{
-			pushMatrix();
-			scale( .5f, .5f );
 			map.render( this );
-			popMatrix();
+			
+			try
+			{
+				Point2D.Float wcoord = zt.transformPoint( new java.awt.Point( m.x, m.y ) );
+				
+				Point2i p = map.getClosestPoint( wcoord.x, wcoord.y );
+				
+				color( Color.green );
+				drawRect( map.getPX( p.x, p.y ) - 10, map.getPY( p.x, p.y ) - 10, 20, 20 );
+			} catch( NoninvertibleTransformException e )
+			{
+				
+			}
 		}
+		
 		popMatrix();
 	}
 	

@@ -115,7 +115,6 @@ public class ZoomTransform implements MouseListener, MouseMotionListener, MouseW
 					Point2D p2 = transformPoint( p );
 					coordTransform.translate( p2.getX() - p1.getX(), p2.getY()
 							- p1.getY() );
-					//targetComponent.repaint();
 				}
 			}
 			else
@@ -129,7 +128,6 @@ public class ZoomTransform implements MouseListener, MouseMotionListener, MouseW
 					Point2D p2 = transformPoint( p );
 					coordTransform.translate( p2.getX() - p1.getX(), p2.getY()
 							- p1.getY() );
-					//targetComponent.repaint();
 				}
 			}
 		} catch( NoninvertibleTransformException ex )
@@ -138,8 +136,7 @@ public class ZoomTransform implements MouseListener, MouseMotionListener, MouseW
 		}
 	}
 	
-	private Point2D.Float transformPoint( java.awt.Point p1 )
-			throws NoninvertibleTransformException
+	public Point2D.Float transformPoint( java.awt.Point p1 ) throws NoninvertibleTransformException
 	{
 		// System.out.println("Model -> Screen Transformation:");
 		// showMatrix(coordTransform);

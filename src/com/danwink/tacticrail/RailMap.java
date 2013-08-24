@@ -2,6 +2,8 @@ package com.danwink.tacticrail;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point2i;
+
 import com.phyloa.dlib.renderer.Graphics2DRenderer;
 import com.phyloa.dlib.util.DMath;
 
@@ -74,4 +76,11 @@ public class RailMap
 		return r + y * (h);
 	}
 	
+	public Point2i getClosestPoint( float x, float y )
+	{
+		Point2i p = new Point2i();
+		p.y = Math.round( (y-r)/h );
+		p.x = Math.round( (x - r - (p.y % 2 == 0 ? 0 : r)) / bbw );
+		return p;
+	}
 }
