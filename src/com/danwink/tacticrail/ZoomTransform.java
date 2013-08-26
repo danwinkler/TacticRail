@@ -46,13 +46,19 @@ public class ZoomTransform implements MouseListener, MouseMotionListener, MouseW
 	
 	public void mousePressed( MouseEvent e )
 	{
-		dragStartScreen = e.getPoint();
-		dragEndScreen = null;
+		if( e.getButton() == MouseEvent.BUTTON2 )
+		{
+			dragStartScreen = e.getPoint();
+			dragEndScreen = null;
+		}
 	}
 	
 	public void mouseReleased( MouseEvent e )
 	{
-		// moveCamera(e);
+		if( e.getButton() == MouseEvent.BUTTON2 )
+		{
+			dragStartScreen = null;
+		}
 	}
 	
 	public void mouseEntered( MouseEvent e )
@@ -69,7 +75,10 @@ public class ZoomTransform implements MouseListener, MouseMotionListener, MouseW
 	
 	public void mouseDragged( MouseEvent e )
 	{
-		moveCamera( e );
+		if( dragStartScreen != null )
+		{
+			moveCamera( e );
+		}
 	}
 	
 	public void mouseWheelMoved( MouseWheelEvent e )
@@ -80,67 +89,61 @@ public class ZoomTransform implements MouseListener, MouseMotionListener, MouseW
 	
 	private void moveCamera( MouseEvent e )
 	{
-		// System.out.println("============= Move camera ============");
-		try
-		{
-			dragEndScreen = e.getPoint();
-			Point2D.Float dragStart = transformPoint( dragStartScreen );
-			Point2D.Float dragEnd = transformPoint( dragEndScreen );
-			double dx = dragEnd.getX() - dragStart.getX();
-			double dy = dragEnd.getY() - dragStart.getY();
-			coordTransform.translate( dx, dy );
-			dragStartScreen = dragEndScreen;
-			dragEndScreen = null;
-			//targetComponent.repaint();
-		} catch( NoninvertibleTransformException ex )
-		{
-			ex.printStackTrace();
-		}
+		dragEndScreen = e.getPoint();
+		Point2D.Float dragStart = transformPoint( dragStartScreen );
+		Point2D.Float dragEnd = transformPoint( dragEndScreen );
+		double dx = dragEnd.getX() - dragStart.getX();
+		double dy = dragEnd.getY() - dragStart.getY();
+		coordTransform.translate( dx, dy );
+		dragStartScreen = dragEndScreen;
+		dragEndScreen = null;
+		//targetComponent.repaint();
 	}
 	
 	private void zoomCamera( MouseWheelEvent e )
 	{
-		try
+		int wheelRotation = e.getWheelRotation();
+		java.awt.Point p = e.getPoint();
+		if( wheelRotation > 0 )
 		{
-			int wheelRotation = e.getWheelRotation();
-			java.awt.Point p = e.getPoint();
-			if( wheelRotation > 0 )
+			if( zoomLevel < maxZoomLevel )
 			{
-				if( zoomLevel < maxZoomLevel )
-				{
-					zoomLevel++;
-					Point2D p1 = transformPoint( p );
-					coordTransform.scale( 1 / zoomMultiplicationFactor,
-							1 / zoomMultiplicationFactor );
-					Point2D p2 = transformPoint( p );
-					coordTransform.translate( p2.getX() - p1.getX(), p2.getY()
-							- p1.getY() );
-				}
+				zoomLevel++;
+				Point2D p1 = transformPoint( p );
+				coordTransform.scale( 1 / zoomMultiplicationFactor,
+						1 / zoomMultiplicationFactor );
+				Point2D p2 = transformPoint( p );
+				coordTransform.translate( p2.getX() - p1.getX(), p2.getY()
+						- p1.getY() );
 			}
-			else
-			{
-				if( zoomLevel > minZoomLevel )
-				{
-					zoomLevel--;
-					Point2D p1 = transformPoint( p );
-					coordTransform.scale( zoomMultiplicationFactor,
-							zoomMultiplicationFactor );
-					Point2D p2 = transformPoint( p );
-					coordTransform.translate( p2.getX() - p1.getX(), p2.getY()
-							- p1.getY() );
-				}
-			}
-		} catch( NoninvertibleTransformException ex )
+		}
+		else
 		{
-			ex.printStackTrace();
+			if( zoomLevel > minZoomLevel )
+			{
+				zoomLevel--;
+				Point2D p1 = transformPoint( p );
+				coordTransform.scale( zoomMultiplicationFactor,
+						zoomMultiplicationFactor );
+				Point2D p2 = transformPoint( p );
+				coordTransform.translate( p2.getX() - p1.getX(), p2.getY()
+						- p1.getY() );
+			}
 		}
 	}
 	
-	public Point2D.Float transformPoint( java.awt.Point p1 ) throws NoninvertibleTransformException
+	public Point2D.Float transformPoint( java.awt.Point p1 )
 	{
 		// System.out.println("Model -> Screen Transformation:");
 		// showMatrix(coordTransform);
-		AffineTransform inverse = coordTransform.createInverse();
+		AffineTransform inverse = null;
+		try
+		{
+			inverse = coordTransform.createInverse();
+		} catch( NoninvertibleTransformException e )
+		{
+			return new Point2D.Float( p1.x, p1.y );
+		}
 		// System.out.println("Screen -> Model Transformation:");
 		// showMatrix(inverse);
 		
@@ -202,6 +205,19 @@ public class ZoomTransform implements MouseListener, MouseMotionListener, MouseW
 		
 		this.coordTransform = coordTransform;
 		
+	}
+
+	public float getZoomDistance( int d )
+	{
+		try
+		{
+		Point2D.Float a = transformPoint( new java.awt.Point( 0, 0 ) );
+		Point2D.Float b = transformPoint( new java.awt.Point( 0, d ) );
+		return a.y - b.y;
+		} catch( Exception ex )
+		{
+			return 0;
+		}
 	}
 	
 }

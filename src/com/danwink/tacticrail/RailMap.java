@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point2i;
 
+import com.danwink.tacticrail.Point.PointType;
 import com.phyloa.dlib.renderer.Graphics2DRenderer;
 import com.phyloa.dlib.util.DMath;
 
@@ -82,5 +83,30 @@ public class RailMap
 		p.y = Math.round( (y-r)/h );
 		p.x = Math.round( (x - r - (p.y % 2 == 0 ? 0 : r)) / bbw );
 		return p;
+	}
+	
+	public boolean isValid( Railway r )
+	{
+		Point p1 = pointMap[r.p1.x][r.p1.y];
+		Point p2 = pointMap[r.p2.x][r.p2.y];
+		
+		int xdiff = r.p1.x - r.p2.x;
+		int ydiff = r.p1.y - r.p2.y;
+		
+		//Points can't be nonetype
+		if( p1.type == PointType.NONE ) return false;
+		if( p2.type == PointType.NONE ) return false;
+		
+		//Points can't be the same point
+		if( xdiff == 0 && ydiff == 0 ) return false;
+		
+		//If points are on same y, the points have to be exactly 1 away from each other
+		if( ydiff == 0 && Math.abs( xdiff ) != 1 ) return false;
+		
+		if( Math.abs( ydiff ) > 1 ) return false;
+		
+		if( Math.abs( ydiff ) == 1 && !(xdiff == 0 || (r.p1.y % 2 == 0 ? xdiff == 1 : xdiff == -1)) ) return false;
+		
+		return true;
 	}
 }

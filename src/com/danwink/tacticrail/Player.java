@@ -4,6 +4,8 @@ public class Player
 {
 	int id;
 	
+	int money;
+	
 	public Player()
 	{
 		

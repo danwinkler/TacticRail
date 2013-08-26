@@ -21,7 +21,7 @@ public class RailServer extends DNGFServer<RailMessageType>
 	
 	public void handleMessage( int sender, RailMessageType type, Object message )
 	{
-		
+	
 	}
 
 	public void onConnect( int id )
@@ -29,6 +29,7 @@ public class RailServer extends DNGFServer<RailMessageType>
 		Player newPlayer = new Player( id );
 		players.put( id, newPlayer );
 		sendOne( id, RailMessageType.MAP, map );
+		sendOne( id, RailMessageType.SETPLAYER, newPlayer );
 	}
 
 	public void onDisconnect( int id )

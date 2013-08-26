@@ -26,5 +26,7 @@ public class RailClassRegisterer
 		ArrayList.class,
 		
 		Point2f.class,
+		
+		GamePhase.class,
 	};
 }

@@ -24,7 +24,7 @@ public class Point
 		{
 		case NORMAL:
 			g.color( Color.black );
-			g.fillOval( -2, -2, 4, 4 );
+			g.fillOval( -3, -3, 5, 5 );
 			break;
 		case MOUNTAIN:
 			g.color( Color.black );
