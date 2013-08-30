@@ -5,5 +5,7 @@ public enum RailMessageType
 	MAP,
 	SETPHASE,
 	SETPLAYER,
+	CONTINUE, 
+	SETTURN,
 }
 

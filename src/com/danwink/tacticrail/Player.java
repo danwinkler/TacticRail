@@ -6,6 +6,9 @@ public class Player
 	
 	int money;
 	
+	//Server only
+	boolean readyForContinue;
+	
 	public Player()
 	{
 		
