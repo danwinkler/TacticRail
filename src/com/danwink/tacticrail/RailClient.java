@@ -263,9 +263,12 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	public void event( DUIEvent event )
 	{
 		DUIElement e = event.getElement();
-		if( e == finishedButton )
+		if( e instanceof DButton && event.getType() == DButton.MOUSE_UP )
 		{
-			send( RailMessageType.CONTINUE, null );
+			if( e == finishedButton )
+			{
+				send( RailMessageType.CONTINUE, null );
+			}
 		}
 	}
 }
