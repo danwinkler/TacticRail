@@ -6,6 +6,7 @@ public enum RailMessageType
 	SETPHASE,
 	SETPLAYER,
 	CONTINUE, 
-	SETTURN,
+	SETTURN, 
+	BUILDREQUEST,
 }
 

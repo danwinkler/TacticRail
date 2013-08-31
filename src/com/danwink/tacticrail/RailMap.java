@@ -12,6 +12,7 @@ public class RailMap
 {
 	ArrayList<Border> borders = new ArrayList<Border>();
 	Point[][] pointMap;
+	ArrayList<Railway> rails = new ArrayList<Railway>();
 	
 	//Hex stuff 
 	float s = 50;
@@ -108,5 +109,19 @@ public class RailMap
 		if( Math.abs( ydiff ) == 1 && !(xdiff == 0 || (r.p1.y % 2 == 0 ? xdiff == 1 : xdiff == -1)) ) return false;
 		
 		return true;
+	}
+
+	public void addRails( ArrayList<Railway> buildAttempt, Player player )
+	{
+		for( Railway r : buildAttempt )
+		{
+			r.owner = player.id;
+			rails.add( r );
+		}
+	}
+	
+	public int getCost( Point2i a, Point2i b )
+	{
+		return pointMap[a.x][a.y].type.cost + pointMap[b.x][b.y].type.cost;
 	}
 }

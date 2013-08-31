@@ -45,11 +45,18 @@ public class Point
 	
 	public enum PointType
 	{
-		NORMAL,
-		MOUNTAIN,
-		SMALLCITY,
-		MEDIUMCITY,
-		LARGECITY,
-		NONE
+		NORMAL( 500000 ),
+		MOUNTAIN( 1000000 ),
+		SMALLCITY( 2000000 ),
+		MEDIUMCITY( 3000000 ),
+		LARGECITY( 4000000 ),
+		NONE( 0 );
+		
+		int cost;
+		
+		PointType( int cost )
+		{
+			this.cost = cost;
+		}
 	}
 }

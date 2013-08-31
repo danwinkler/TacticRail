@@ -20,6 +20,7 @@ public class RailClassRegisterer
 		RailMap.class,
 		Border.class,
 		Border.BorderType.class,
+		Railway.class,
 		
 		Player.class,
 		

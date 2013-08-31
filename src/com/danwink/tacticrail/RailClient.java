@@ -65,6 +65,22 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			GamePhase newPhase = (GamePhase)o;
 			if( newPhase != phase ) phaseStart = System.currentTimeMillis();
 			phase = newPhase;
+			
+			switch( phase )
+			{
+			case BEGIN:
+				break;
+			case BUILD:
+				break;
+			case SHOWBUILD:
+				send( RailMessageType.BUILDREQUEST, attemptedBuild );
+				attemptedBuild.clear();
+				break;
+			case MANAGETRAINS:
+				break;
+			case SHOWPROFIT:
+				break;
+			}
 			break;
 		case SETPLAYER:
 			player = (Player)o;
@@ -121,13 +137,14 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				}
 				else
 				{
-					if( (p.x != lastPoint.x || p.y != lastPoint.y) && mw.distanceSq( pw ) < 15*15 && moneySpent <= 20000000-1000000 && moneySpent <= player.money-1000000 )
+					int price = map.getCost( lastPoint, p );
+					if( (p.x != lastPoint.x || p.y != lastPoint.y) && mw.distanceSq( pw ) < 15*15 && moneySpent <= 20000000-price && moneySpent <= player.money-price )
 					{
 						Railway r = new Railway( player.id, lastPoint, p );
 						if( map.isValid( r ) )
 						{
 							attemptedBuild.add( r );
-							moneySpent += 1000000;
+							moneySpent += price;
 							lastPoint = p;
 						}
 					}

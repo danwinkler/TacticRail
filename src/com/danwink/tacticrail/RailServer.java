@@ -36,11 +36,16 @@ public class RailServer extends DNGFServer<RailMessageType>
 			break;
 		case MAP:
 			break;
-		case SETPHASE:
-			break;
 		case SETPLAYER:
 			break;
-		default:
+		case BUILDREQUEST:
+			ArrayList<Railway> buildAttempt = (ArrayList<Railway>)message;
+			int price = Railway.getPrice( buildAttempt, map );
+			Player player = players.get( sender );
+			if( price <= player.money )
+			{
+				map.addRails( buildAttempt, player );
+			}
 			break;
 		}
 	}
