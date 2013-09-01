@@ -46,10 +46,10 @@ public class Point
 	public enum PointType
 	{
 		NORMAL( 500000 ),
-		MOUNTAIN( 1000000 ),
-		SMALLCITY( 2000000 ),
-		MEDIUMCITY( 3000000 ),
-		LARGECITY( 4000000 ),
+		MOUNTAIN( 1500000 ),
+		SMALLCITY( 2500000 ),
+		MEDIUMCITY( 3500000 ),
+		LARGECITY( 4500000 ),
 		NONE( 0 );
 		
 		int cost;

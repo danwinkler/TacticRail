@@ -1,5 +1,6 @@
 package com.danwink.tacticrail;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2i;
@@ -38,7 +39,7 @@ public class RailMap
 		}
 	}
 
-	public void render( Graphics2DRenderer g )
+	public void render( RailClient g )
 	{
 		//g.scale( 2 );
 		for( Border b : borders )
@@ -55,6 +56,11 @@ public class RailMap
 				pointMap[x][y].render( g );
 				g.popMatrix();
 			}
+		}
+		
+		for( Railway r : rails )
+		{
+			r.render( g, this, new Color( g.players.get( r.owner ).color ) );
 		}
 	}
 
@@ -108,14 +114,18 @@ public class RailMap
 		
 		if( Math.abs( ydiff ) == 1 && !(xdiff == 0 || (r.p1.y % 2 == 0 ? xdiff == 1 : xdiff == -1)) ) return false;
 		
+		for( Railway toCheck : rails )
+		{
+			if( toCheck.equals( r ) ) return false;
+		}
+		
 		return true;
 	}
 
-	public void addRails( ArrayList<Railway> buildAttempt, Player player )
+	public void addRails( ArrayList<Railway> buildAttempt )
 	{
 		for( Railway r : buildAttempt )
 		{
-			r.owner = player.id;
 			rails.add( r );
 		}
 	}

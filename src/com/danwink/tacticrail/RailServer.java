@@ -1,5 +1,6 @@
 package com.danwink.tacticrail;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -18,6 +19,8 @@ public class RailServer extends DNGFServer<RailMessageType>
 	int turn = 1;
 	
 	long phaseStart;
+	
+	Color[] colors = { Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE, Color.PINK, Color.MAGENTA, Color.YELLOW, Color.CYAN };
 
 	public RailServer()
 	{
@@ -44,7 +47,12 @@ public class RailServer extends DNGFServer<RailMessageType>
 			Player player = players.get( sender );
 			if( price <= player.money )
 			{
-				map.addRails( buildAttempt, player );
+				for( Railway r : buildAttempt )
+				{
+					r.owner = player.id;
+				}
+				map.addRails( buildAttempt );
+				sendAll( RailMessageType.UPDATERAILS, buildAttempt );
 			}
 			break;
 		}
@@ -73,6 +81,8 @@ public class RailServer extends DNGFServer<RailMessageType>
 			if( readyForContinue() && players.size() > 0 )
 			{
 				phase = GamePhase.BUILD;
+				for( int i = 0; i < players.size(); i++ ) { players.getIndex( i ).color = colors[i].getRGB(); }
+				sendAll( RailMessageType.PLAYERLIST, players.getArrayList() );
 				sendAll( RailMessageType.SETPHASE, phase );
 				for( Player p : players ) { p.readyForContinue = false; }
 				phaseStart = System.currentTimeMillis();

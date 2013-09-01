@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2i;
+import javax.vecmath.Vector2f;
 
 import com.danwink.dngf.DNGFClient;
 import com.phyloa.dlib.dui.AWTComponentEventMapper;
@@ -17,6 +18,7 @@ import com.phyloa.dlib.dui.DUIEvent;
 import com.phyloa.dlib.dui.DUIListener;
 import com.phyloa.dlib.renderer.DScreenHandler;
 import com.phyloa.dlib.renderer.Graphics2DRenderer;
+import com.phyloa.dlib.util.DHashList;
 import com.phyloa.dlib.util.DMath;
 
 public class RailClient extends DNGFClient<RailMessageType> implements DUIListener
@@ -28,6 +30,8 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	ZoomTransform zt;
 	
 	Player player;
+	
+	DHashList<Integer, Player> players = new DHashList<Integer, Player>();
 	
 	boolean firstFrame = true;
 	
@@ -63,31 +67,46 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			break;
 		case SETPHASE:
 			GamePhase newPhase = (GamePhase)o;
-			if( newPhase != phase ) phaseStart = System.currentTimeMillis();
-			phase = newPhase;
-			
-			switch( phase )
-			{
-			case BEGIN:
-				break;
-			case BUILD:
-				break;
-			case SHOWBUILD:
-				send( RailMessageType.BUILDREQUEST, attemptedBuild );
-				attemptedBuild.clear();
-				break;
-			case MANAGETRAINS:
-				break;
-			case SHOWPROFIT:
-				break;
+			if( newPhase != phase ) 
+			{ 
+				phaseStart = System.currentTimeMillis();
+				switch( newPhase )
+				{
+				case BEGIN:
+					break;
+				case BUILD:
+					if( phase == GamePhase.BEGIN )
+					{
+						finishedButton.setText( "Finished!" );
+					}
+					break;
+				case SHOWBUILD:
+					send( RailMessageType.BUILDREQUEST, attemptedBuild );
+					attemptedBuild.clear();
+					break;
+				case MANAGETRAINS:
+					break;
+				case SHOWPROFIT:
+					break;
+				}
+				phase = newPhase;
 			}
 			break;
 		case SETPLAYER:
 			player = (Player)o;
 			break;
 		case SETTURN:
-				turn = (Integer)o;
+			turn = (Integer)o;
 			break;
+		case UPDATERAILS:
+			map.addRails( (ArrayList<Railway>)o );
+			break;
+		case PLAYERLIST:
+			ArrayList<Player> par = (ArrayList<Player>)o;
+			for( Player p : par )
+			{
+				players.put( p.id, p );
+			}
 		default:
 			break;
 		}
@@ -106,7 +125,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			dem.register( canvas );
 			dui = new DUI( dem );
 			dui.addDUIListener( this );
-			finishedButton = new DButton( "Finished!", getWidth() - 100, getHeight() - 50, 100, 50 );
+			finishedButton = new DButton( "Begin!", getWidth() - 100, getHeight() - 50, 100, 50 );
 			dui.add( finishedButton );
 			
 			phaseStart = System.currentTimeMillis();
@@ -137,15 +156,32 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				}
 				else
 				{
-					int price = map.getCost( lastPoint, p );
-					if( (p.x != lastPoint.x || p.y != lastPoint.y) && mw.distanceSq( pw ) < 15*15 && moneySpent <= 20000000-price && moneySpent <= player.money-price )
+					if( (p.x != lastPoint.x || p.y != lastPoint.y) && mw.distanceSq( pw ) < 15*15 )
 					{
 						Railway r = new Railway( player.id, lastPoint, p );
 						if( map.isValid( r ) )
 						{
-							attemptedBuild.add( r );
-							moneySpent += price;
-							lastPoint = p;
+							//Check to see if we are already have a track to be built here
+							boolean found = false;
+							for( Railway toCheck : attemptedBuild )
+							{
+								if( toCheck.equals( r ) )
+								{
+									found = true; 
+									break;
+								}
+							}
+							
+							if( !found )
+							{
+								int price = map.getCost( lastPoint, p );
+								if( moneySpent <= RailOptions.MAX_SPENDING_PER_TURN-price && moneySpent <= player.money-price )
+								{
+									attemptedBuild.add( r );
+									moneySpent += price;
+									lastPoint = p;
+								}
+							}
 						}
 					}
 				}
@@ -153,6 +189,13 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			else if( lastPoint != null )
 			{
 				lastPoint = null;
+			}
+			
+			if( k.ctrl && k.z && attemptedBuild.size() > 0 )
+			{
+				Railway r = attemptedBuild.remove( attemptedBuild.size()-1 );
+				moneySpent -= map.getCost( r.p1, r.p2 );
+				k.z = false;
 			}
 			
 			break;
@@ -208,8 +251,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			for( int i = 0; i < attemptedBuild.size(); i++ )
 			{
 				Railway r = attemptedBuild.get( i );
-				color( Color.BLACK );
-				line( map.getPX( r.p1.x, r.p1.y ), map.getPY( r.p1.x, r.p1.y ), map.getPX( r.p2.x, r.p2.y ), map.getPY( r.p2.x, r.p2.y ) );
+				r.render( this, map, Color.black );
 			}
 			
 			popMatrix();
@@ -255,18 +297,28 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			
 		}
 		
-		color( 230, 230, 230 );
-		fillRect( getWidth()-60, 0, 60, 60 );
-		color( 100, 100, 100 );
-		drawRect( getWidth()-60, 0, 60, 60 );
-		
-		float timerNormal = (float)(System.currentTimeMillis()-phaseStart) / (phase.getPhaseLength());
-		
-		color( 0, 255, 0 );
-		fillOval( getWidth()-50, 10, 40, 40 );
-		color( 255, 0, 0 );
-		g.fillArc( getWidth()-50, 10, 40, 40, 90, -(int)(timerNormal*360) );
-		
+		pushMatrix();
+			translate( getWidth()-60, 0 );
+			color( 230, 230, 230 );
+			fillRect( 0, 0, 60, 60 );
+			color( 100, 100, 100 );
+			drawRect( 0, 0, 60, 60 );
+			
+			float timerNormal = (float)(System.currentTimeMillis()-phaseStart) / (phase.getPhaseLength());
+			
+			color( 0, 255, 0 );
+			fillOval( 10, 10, 40, 40 );
+			color( 255, 0, 0 );
+			g.fillArc( 10, 10, 40, 40, 90, -(int)(timerNormal*360) );
+			
+			if( phase != GamePhase.BEGIN )
+			{
+				color( 0 );
+				String timerText = Integer.toString( Math.round( (phase.getPhaseLength() - (System.currentTimeMillis()-phaseStart))/1000 ) );
+				Vector2f timerTextSize = this.getStringSize( timerText );
+				text( timerText, 30 - timerTextSize.x*.5f, 30 - timerTextSize.y*.5f );
+			}
+		popMatrix();
 	}
 	
 	public static void main( String[] args )

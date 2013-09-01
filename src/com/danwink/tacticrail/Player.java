@@ -1,5 +1,7 @@
 package com.danwink.tacticrail;
 
+import java.awt.Color;
+
 public class Player
 {
 	int id;
@@ -8,6 +10,8 @@ public class Player
 	
 	//Server only
 	boolean readyForContinue;
+
+	public int color;
 	
 	public Player()
 	{
