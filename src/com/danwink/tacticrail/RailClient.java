@@ -83,6 +83,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				case SHOWBUILD:
 					send( RailMessageType.BUILDREQUEST, attemptedBuild );
 					attemptedBuild.clear();
+					moneySpent = 0;
 					break;
 				case MANAGETRAINS:
 					break;

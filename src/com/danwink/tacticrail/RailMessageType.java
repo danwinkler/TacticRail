@@ -10,5 +10,6 @@ public enum RailMessageType
 	BUILDREQUEST, 
 	UPDATERAILS, 
 	PLAYERLIST,
+	SETMONEY,
 }
 

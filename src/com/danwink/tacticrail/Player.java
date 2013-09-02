@@ -10,6 +10,7 @@ public class Player
 	
 	//Server only
 	boolean readyForContinue;
+	boolean sentRails;
 
 	public int color;
 	

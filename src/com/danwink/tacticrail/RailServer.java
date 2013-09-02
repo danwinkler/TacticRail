@@ -21,6 +21,8 @@ public class RailServer extends DNGFServer<RailMessageType>
 	long phaseStart;
 	
 	Color[] colors = { Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE, Color.PINK, Color.MAGENTA, Color.YELLOW, Color.CYAN };
+	
+	ArrayList<Railway> railsToAdd = new ArrayList<Railway>();
 
 	public RailServer()
 	{
@@ -31,7 +33,7 @@ public class RailServer extends DNGFServer<RailMessageType>
 	
 	public void handleMessage( int sender, RailMessageType type, Object message )
 	{
-		System.out.println( "SERVER: " + sender + "::" + type.toString() );
+		System.out.println( "SERVER RECIEVED: " + sender + ": " + type.toString() );
 		switch( type )
 		{
 		case CONTINUE:
@@ -47,12 +49,14 @@ public class RailServer extends DNGFServer<RailMessageType>
 			Player player = players.get( sender );
 			if( price <= player.money )
 			{
+				player.money -= price;
 				for( Railway r : buildAttempt )
 				{
 					r.owner = player.id;
 				}
-				map.addRails( buildAttempt );
-				sendAll( RailMessageType.UPDATERAILS, buildAttempt );
+				railsToAdd.addAll( buildAttempt );
+				sendOne( sender, RailMessageType.SETMONEY, player.money );
+				player.sentRails = true;
 			}
 			break;
 		}
@@ -61,7 +65,7 @@ public class RailServer extends DNGFServer<RailMessageType>
 	public void onConnect( int id )
 	{
 		Player newPlayer = new Player( id );
-		newPlayer.money = 20000000;
+		newPlayer.money = RailOptions.START_MONEY;
 		players.put( id, newPlayer );
 		sendOne( id, RailMessageType.MAP, map );
 		sendOne( id, RailMessageType.SETPLAYER, newPlayer );
@@ -98,6 +102,50 @@ public class RailServer extends DNGFServer<RailMessageType>
 			}
 			break;
 		case SHOWBUILD:
+			boolean allSent = true;
+			for( Player p : players )
+			{
+				if( !p.sentRails )
+				{
+					allSent = false;
+					break;
+				}
+			}
+			if( allSent )
+			{
+				//If there are two rails on same spot, choose a random one
+				//TODO: have some sort of auction in this circumstance
+				for( int i = 0; i < railsToAdd.size(); i++ )
+				{
+					for( int j = 0; j < railsToAdd.size(); j++ )
+					{
+						if( i == j ) continue;
+						if( railsToAdd.get( i ).equals( railsToAdd.get( j ) ) )
+						{
+							if( Math.random() > .5f )
+							{
+								railsToAdd.remove( i );
+								i--;
+								break;
+							}
+							else
+							{
+								railsToAdd.remove( j );
+								j--;
+								continue;
+							}
+						}
+					}
+				}
+				
+				map.addRails( railsToAdd );
+				sendAll( RailMessageType.UPDATERAILS, railsToAdd );
+				railsToAdd.clear();
+				for( Player p : players )
+				{
+					p.sentRails = false;
+				}
+			}
 			if( System.currentTimeMillis() - phaseStart > phase.getPhaseLength() )
 			{
 				phase = GamePhase.MANAGETRAINS;
