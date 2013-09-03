@@ -53,9 +53,14 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 		addClasses( RailClassRegisterer.classes );
 	}
 	
-	public void setup()
+	public void gameSetup()
 	{
 	
+	}
+	
+	public void clientStart()
+	{
+		
 	}
 
 	public void handleMessage( RailMessageType type, Object o )
@@ -255,9 +260,40 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				r.render( this, map, Color.black );
 			}
 			
-			popMatrix();
+			if( !m.clicked && phase != GamePhase.BEGIN )
+			{
+				City c = null;
+				Point2D.Float mw = zt.transformPoint( new java.awt.Point( m.x, m.y ) );
+				
+				Point2i cPoint = map.getClosestPoint( mw.x, mw.y );
+				for( int i = 0; i < map.cities.size(); i++ )
+				{
+					City test = map.cities.get( i );
+					
+					if( test.pos.equals( cPoint ) )
+					{
+						c = test;
+						break;
+					}
+				}
+				
+				if( c != null )
+				{
+					pushMatrix();
+						translate( map.getPX( c.pos.x, c.pos.y ), map.getPY( c.pos.x, c.pos.y ) );
+						color( 255, 255, 255 );
+						fillRect( 0, 0, 300, c.supplies.length * 20 );
+						color( 0, 0, 0 );
+						drawRect( 0, 0, 300, c.supplies.length * 20 );
+						for( int i = 0; i < c.supplies.length; i++ )
+						{
+							text( Cargo.values()[i].toString() + ": " + c.supplies[i] + " Buying: " + c.buyPrice( i ) + " Selling: " + c.sellPrice( i ), 10, 20 * i + 13 );
+						}
+					popMatrix();
+				}
+			}
 			
-			text( p.x + ", " + p.y, 50, 50 );
+			popMatrix();
 		}
 		
 		dui.render( this );
@@ -340,5 +376,12 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				send( RailMessageType.CONTINUE, null );
 			}
 		}
+	}
+
+	@Override
+	public void reset()
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

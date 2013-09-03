@@ -12,6 +12,7 @@ public class RailServer extends DNGFServer<RailMessageType>
 	DHashList<Integer, Player> players = new DHashList<Integer, Player>();
 	
 	RailMap map;
+	DHashList<Integer, Train> trains = new DHashList<Integer, Train>();
 	
 	ServerLoop sl;
 	
@@ -188,5 +189,15 @@ public class RailServer extends DNGFServer<RailMessageType>
 			}
 		}
 		return foundNone;
+	}
+
+	public void serverStart()
+	{
+		
+	}
+
+	public void reset()
+	{
+		
 	}
 }

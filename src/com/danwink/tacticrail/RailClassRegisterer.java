@@ -23,15 +23,18 @@ public class RailClassRegisterer
 		Border.class,
 		Border.BorderType.class,
 		Railway.class,
+		Train.class,
+		Train.TrainType.class,
+		City.class,
+		Cargo.class,
 		
 		Player.class,
 		
 		ArrayList.class,
 		
-		
-		
 		Point2f.class,
 		Point2i.class,
+		int[].class,
 		
 		GamePhase.class,
 	};

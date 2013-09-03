@@ -92,6 +92,7 @@ public class RailMapGen
 			if( map.pointMap[x][y].type == PointType.NORMAL )
 			{
 				map.pointMap[x][y].type = PointType.SMALLCITY;
+				map.cities.add( new City( x, y, City.SMALL ) );
 				added++;
 			}
 		}

@@ -14,6 +14,7 @@ public class RailMap
 	ArrayList<Border> borders = new ArrayList<Border>();
 	Point[][] pointMap;
 	ArrayList<Railway> rails = new ArrayList<Railway>();
+	ArrayList<City> cities = new ArrayList<City>();
 	
 	//Hex stuff 
 	float s = 50;
