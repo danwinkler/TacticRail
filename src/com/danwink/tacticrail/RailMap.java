@@ -1,16 +1,19 @@
 package com.danwink.tacticrail;
 
 import java.awt.Color;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.geom.Area;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2i;
 
 import com.danwink.tacticrail.Point.PointType;
-import com.phyloa.dlib.renderer.Graphics2DRenderer;
 import com.phyloa.dlib.util.DMath;
 
 public class RailMap 
 {
+	ArrayList<Polygon> fill = new ArrayList<Polygon>();
 	ArrayList<Border> borders = new ArrayList<Border>();
 	Point[][] pointMap;
 	ArrayList<Railway> rails = new ArrayList<Railway>();
@@ -42,7 +45,11 @@ public class RailMap
 
 	public void render( RailClient g )
 	{
-		//g.scale( 2 );
+		g.color( Color.GREEN );
+		for( Polygon p : fill )
+		{
+			g.g.fill( p );
+		}
 		for( Border b : borders )
 		{
 			b.render( g );

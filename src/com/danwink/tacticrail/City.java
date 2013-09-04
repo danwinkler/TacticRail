@@ -46,11 +46,11 @@ public class City
 
 	public int sellPrice( int i )
 	{
-		return (20000-supplies[i])/50 + 5;
+		return (20000-supplies[i])/RailOptions.PRICE_FACTOR + 5;
 	}
 
 	public int buyPrice( int i )
 	{
-		return (20000-supplies[i])/50 - 5;
+		return (20000-supplies[i])/RailOptions.PRICE_FACTOR - 5;
 	}
 }

@@ -1,7 +1,13 @@
 package com.danwink.tacticrail;
 
 import java.awt.Color;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Point2i;
@@ -31,6 +37,8 @@ public class RailClassRegisterer
 		Player.class,
 		
 		ArrayList.class,
+		
+		Polygon.class,
 		
 		Point2f.class,
 		Point2i.class,

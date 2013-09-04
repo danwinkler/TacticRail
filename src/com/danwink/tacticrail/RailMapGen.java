@@ -1,6 +1,7 @@
 package com.danwink.tacticrail;
 
 import java.awt.Polygon;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
@@ -47,6 +48,9 @@ public class RailMapGen
 		Border b = new Border();
 		b.type = BorderType.NORMAL;
 		
+		Polygon currentPoly;
+		map.fill.add( currentPoly = new Polygon() );
+		
 		do
 		{
 			float[] f = new float[6];
@@ -59,10 +63,13 @@ public class RailMapGen
 					b.points.add( b.points.get( 0 ) );
 					b = new Border();
 					b.type = BorderType.NORMAL;
+					map.fill.add( currentPoly = new Polygon() );
 				}
 				else
 				{
-					b.points.add( new Point2f( f[0]/1000.f, f[1]/1000.f ) );
+					Point2f p = new Point2f( f[0]/1000.f, f[1]/1000.f );
+					b.points.add( p );
+					currentPoly.addPoint( (int)p.x, (int)p.y );
 				}
 			}
 			

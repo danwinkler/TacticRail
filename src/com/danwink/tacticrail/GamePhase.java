@@ -2,19 +2,17 @@ package com.danwink.tacticrail;
 
 public enum GamePhase
 {
-	BEGIN( "Game Start", 0 ),
-	BUILD( "Build Phase", 30 ),
-	SHOWBUILD( "Build Phase End", 10 ),
-	MANAGETRAINS( "Train Management Phase", 30 ),
-	SHOWPROFIT( "Turn Completion", 10 );
+	BEGIN( "Game Start" ),
+	BUILD( "Build Phase" ),
+	SHOWBUILD( "Build Phase End" ),
+	MANAGETRAINS( "Train Management Phase" ),
+	SHOWPROFIT( "Turn Completion" );
 	
 	String phaseName;
-	int phaseLength;
 	
-	GamePhase( String phaseName, int phaseLength )
+	GamePhase( String phaseName )
 	{
 		this.phaseName = phaseName;
-		this.phaseLength = phaseLength;
 	}
 	
 	public String getPhaseName()
@@ -24,6 +22,15 @@ public enum GamePhase
 	
 	public int getPhaseLength()
 	{
-		return phaseLength*1000;
+		int val = 0;
+		switch( this )
+		{
+		case BEGIN: val = 0; break;
+		case BUILD: val = RailOptions.BUILD_PHASE_LENGTH; break;
+		case MANAGETRAINS: val = RailOptions.MANAGETRAINS_PHASE_LENGTH; break;
+		case SHOWBUILD: val = 10; break;
+		case SHOWPROFIT: val = 10; break;
+		}
+		return val * 1000;
 	}
 }

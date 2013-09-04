@@ -33,6 +33,8 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	
 	DHashList<Integer, Player> players = new DHashList<Integer, Player>();
 	
+	DHashList<Integer, Train> trains = new DHashList<Integer, Train>();
+	
 	boolean firstFrame = true;
 	
 	DUI dui;
@@ -218,7 +220,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 		
 		
 		//Render
-		color( Color.white );
+		color( Color.blue );
 		fillRect( 0, 0, getWidth(), getHeight() );
 		
 		if( map != null )
@@ -281,6 +283,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				{
 					pushMatrix();
 						translate( map.getPX( c.pos.x, c.pos.y ), map.getPY( c.pos.x, c.pos.y ) );
+						scale( -translateAmount/20 );
 						color( 255, 255, 255 );
 						fillRect( 0, 0, 300, c.supplies.length * 20 );
 						color( 0, 0, 0 );
