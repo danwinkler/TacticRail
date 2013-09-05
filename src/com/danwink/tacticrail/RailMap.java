@@ -13,7 +13,7 @@ import com.phyloa.dlib.util.DMath;
 
 public class RailMap 
 {
-	ArrayList<Polygon> fill = new ArrayList<Polygon>();
+	ComplexPolygon fill;
 	ArrayList<Border> borders = new ArrayList<Border>();
 	Point[][] pointMap;
 	ArrayList<Railway> rails = new ArrayList<Railway>();
@@ -45,11 +45,8 @@ public class RailMap
 
 	public void render( RailClient g )
 	{
-		g.color( Color.GREEN );
-		for( Polygon p : fill )
-		{
-			g.g.fill( p );
-		}
+		g.color( Color.WHITE );
+		fill.fill( Color.WHITE, Color.BLUE, g );
 		for( Border b : borders )
 		{
 			b.render( g );

@@ -49,7 +49,8 @@ public class RailMapGen
 		b.type = BorderType.NORMAL;
 		
 		Polygon currentPoly;
-		map.fill.add( currentPoly = new Polygon() );
+		ArrayList<Polygon> tempPolyList = new ArrayList<Polygon>();
+		tempPolyList.add( currentPoly = new Polygon() );
 		
 		do
 		{
@@ -63,7 +64,7 @@ public class RailMapGen
 					b.points.add( b.points.get( 0 ) );
 					b = new Border();
 					b.type = BorderType.NORMAL;
-					map.fill.add( currentPoly = new Polygon() );
+					tempPolyList.add( currentPoly = new Polygon() );
 				}
 				else
 				{
@@ -103,6 +104,8 @@ public class RailMapGen
 				added++;
 			}
 		}
+		
+		map.fill = ComplexPolygon.createFromPolys( tempPolyList );
 		
 		return map;
 	}

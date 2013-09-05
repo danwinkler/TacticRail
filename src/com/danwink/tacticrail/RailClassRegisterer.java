@@ -2,6 +2,7 @@ package com.danwink.tacticrail;
 
 import java.awt.Color;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
@@ -39,6 +40,8 @@ public class RailClassRegisterer
 		ArrayList.class,
 		
 		Polygon.class,
+		ComplexPolygon.class,
+		Rectangle.class,
 		
 		Point2f.class,
 		Point2i.class,
