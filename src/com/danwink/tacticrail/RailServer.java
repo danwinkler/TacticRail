@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.danwink.dngf.DNGFServer;
+import com.danwink.tacticrail.Train.TrainType;
 import com.phyloa.dlib.util.DHashList;
+import com.phyloa.dlib.util.DMath;
 
 public class RailServer extends DNGFServer<RailMessageType>
 {
@@ -86,7 +88,13 @@ public class RailServer extends DNGFServer<RailMessageType>
 			if( readyForContinue() && players.size() > 0 )
 			{
 				phase = GamePhase.BUILD;
-				for( int i = 0; i < players.size(); i++ ) { players.getIndex( i ).color = colors[i].getRGB(); }
+				for( int i = 0; i < players.size(); i++ ) 
+				{ 
+					players.getIndex( i ).color = colors[i].getRGB(); 
+					Train t = new Train( TrainType.BASIC, map.cities.get( DMath.randomi( 0, map.cities.size()-1 ) ).pos, players.getIndex( i ).id ); 
+					trains.put( t.id, t ); 
+					sendAll( RailMessageType.TRAINUPDATE, t );
+				}
 				sendAll( RailMessageType.PLAYERLIST, players.getArrayList() );
 				sendAll( RailMessageType.SETPHASE, phase );
 				for( Player p : players ) { p.readyForContinue = false; }
@@ -140,7 +148,7 @@ public class RailServer extends DNGFServer<RailMessageType>
 				}
 				
 				map.addRails( railsToAdd );
-				sendAll( RailMessageType.UPDATERAILS, railsToAdd );
+				sendAll( RailMessageType.RAILUPDATE, railsToAdd );
 				railsToAdd.clear();
 				for( Player p : players )
 				{

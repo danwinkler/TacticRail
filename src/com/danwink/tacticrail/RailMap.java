@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point2i;
 
 import com.danwink.tacticrail.Point.PointType;
+import com.phyloa.dlib.util.DHashList;
 import com.phyloa.dlib.util.DMath;
 
 public class RailMap 
@@ -97,7 +98,7 @@ public class RailMap
 		return p;
 	}
 	
-	public boolean isValid( Railway r )
+	public boolean isValid( Railway r, DHashList<Integer, Train> trains, Player player, ArrayList<Railway> railsToBuild )
 	{
 		Point p1 = pointMap[r.p1.x][r.p1.y];
 		Point p2 = pointMap[r.p2.x][r.p2.y];
@@ -124,7 +125,46 @@ public class RailMap
 			if( toCheck.equals( r ) ) return false;
 		}
 		
-		return true;
+		for( Train t : trains )
+		{
+			if( t.owner == player.id )
+			{
+				if( t.pos.equals( r.p1 ) )
+				{
+					return true;
+				}
+				if( t.pos.equals( r.p2 ) )
+				{
+					return true;
+				}
+			}
+		}
+		
+		for( Railway railToCheck : rails )
+		{
+			if( railToCheck.owner == r.owner && (railToCheck.p1.equals( r.p1 ) || railToCheck.p2.equals( r.p1 )) )
+			{
+				return true;
+			}
+			if( railToCheck.owner == r.owner && (railToCheck.p1.equals( r.p2 ) || railToCheck.p2.equals( r.p2 )) )
+			{
+				return true;
+			}
+		}
+		
+		for( Railway railToCheck : railsToBuild )
+		{
+			if( railToCheck.owner == r.owner && (railToCheck.p1.equals( r.p1 ) || railToCheck.p2.equals( r.p1 )) )
+			{
+				return true;
+			}
+			if( railToCheck.owner == r.owner && (railToCheck.p1.equals( r.p2 ) || railToCheck.p2.equals( r.p2 )) )
+			{
+				return true;
+			}
+		}
+			
+		return false;
 	}
 
 	public void addRails( ArrayList<Railway> buildAttempt )

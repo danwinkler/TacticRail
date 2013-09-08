@@ -1,19 +1,10 @@
 package com.danwink.tacticrail;
 
-import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Vector;
-
 import javax.vecmath.Point2f;
 import javax.vecmath.Point2i;
-
-import com.phyloa.dlib.network.ClassRegister;
 
 public class RailClassRegisterer 
 {

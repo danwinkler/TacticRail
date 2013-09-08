@@ -8,11 +8,11 @@ public class Player
 	
 	int money;
 	
+	public int color;
+	
 	//Server only
 	boolean readyForContinue;
 	boolean sentRails;
-
-	public int color;
 	
 	public Player()
 	{

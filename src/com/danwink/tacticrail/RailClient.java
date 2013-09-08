@@ -106,7 +106,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 		case SETTURN:
 			turn = (Integer)o;
 			break;
-		case UPDATERAILS:
+		case RAILUPDATE:
 			map.addRails( (ArrayList<Railway>)o );
 			break;
 		case PLAYERLIST:
@@ -115,6 +115,20 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			{
 				players.put( p.id, p );
 			}
+			break;
+		case TRAINUPDATE:
+			Train t = (Train)o;
+			Train thisTrain = trains.get( t.id );
+			if( thisTrain == null )
+			{
+				thisTrain = t;
+				trains.put( t.id, t );
+			}
+			else
+			{
+				thisTrain.set( t );
+			}
+			break;
 		default:
 			break;
 		}
@@ -167,7 +181,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 					if( (p.x != lastPoint.x || p.y != lastPoint.y) && mw.distanceSq( pw ) < 15*15 )
 					{
 						Railway r = new Railway( player.id, lastPoint, p );
-						if( map.isValid( r ) )
+						if( map.isValid( r, trains, player, attemptedBuild ) )
 						{
 							//Check to see if we are already have a track to be built here
 							boolean found = false;
@@ -260,6 +274,11 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			{
 				Railway r = attemptedBuild.get( i );
 				r.render( this, map, Color.black );
+			}
+			
+			for( int i = 0; i < trains.size(); i++ )
+			{
+				trains.get( i ).render( this, map );
 			}
 			
 			if( !m.clicked && phase != GamePhase.BEGIN )
