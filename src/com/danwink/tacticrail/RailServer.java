@@ -155,28 +155,31 @@ public class RailServer extends DNGFServer<RailMessageType>
 					p.sentRails = false;
 				}
 			}
-			if( System.currentTimeMillis() - phaseStart > phase.getPhaseLength() )
+			if( readyForContinue() || System.currentTimeMillis() - phaseStart > phase.getPhaseLength() )
 			{
 				phase = GamePhase.MANAGETRAINS;
 				phaseStart = System.currentTimeMillis();
 				sendAll( RailMessageType.SETPHASE, phase );
+				for( Player p : players ) { p.readyForContinue = false; }
 			}
 			break;
 		case MANAGETRAINS:
-			if( System.currentTimeMillis() - phaseStart > phase.getPhaseLength() )
+			if( readyForContinue() || System.currentTimeMillis() - phaseStart > phase.getPhaseLength() )
 			{
 				phase = GamePhase.SHOWPROFIT;
 				phaseStart = System.currentTimeMillis();
 				sendAll( RailMessageType.SETPHASE, phase );
+				for( Player p : players ) { p.readyForContinue = false; }
 			}
 			break;
 		case SHOWPROFIT:
-			if( System.currentTimeMillis() - phaseStart > phase.getPhaseLength() )
+			if( readyForContinue() || System.currentTimeMillis() - phaseStart > phase.getPhaseLength() )
 			{
 				phase = GamePhase.BUILD;
 				phaseStart = System.currentTimeMillis();
 				sendAll( RailMessageType.SETPHASE, phase );
 				sendAll( RailMessageType.SETTURN, turn );
+				for( Player p : players ) { p.readyForContinue = false; }
 				turn++;
 			}
 			break;

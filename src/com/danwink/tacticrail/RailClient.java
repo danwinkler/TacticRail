@@ -48,7 +48,10 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	//Build Phase
 	Point2i lastPoint;
 	ArrayList<Railway> attemptedBuild = new ArrayList<Railway>();
-	int moneySpent = 0;	
+	int moneySpent = 0;
+	
+	//Manage Phase
+	Train selected;
 	
 	public RailClient()
 	{
@@ -223,6 +226,32 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			break;
 		}
 		case MANAGETRAINS:
+			if( m.clicked && m.y < getHeight() - 50 && m.y > 60 )
+			{
+				Point2D.Float mw = zt.transformPoint( new java.awt.Point( m.x, m.y ) );
+				
+				Point2i p = map.getClosestPoint( mw.x, mw.y );
+				
+				selected = null;
+				for( Train t : trains )
+				{
+					if( t.owner == player.id )
+					{
+						if( t.pos.equals( p ) )
+						{
+							selected = t;
+							return;
+						}
+					}
+				}
+			}
+			if( m.rightClicked && m.y < getHeight() - 50 && m.y > 60 )
+			{
+				if( selected != null )
+				{
+					
+				}
+			}
 			break;
 		case SHOWBUILD:
 			break;
@@ -278,7 +307,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			
 			for( int i = 0; i < trains.size(); i++ )
 			{
-				trains.get( i ).render( this, map );
+				trains.get( i ).render( this, map, selected == trains.get( i ) );
 			}
 			
 			if( !m.clicked && phase != GamePhase.BEGIN )
@@ -313,6 +342,23 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 						}
 					popMatrix();
 				}
+			}
+			
+			switch( phase )
+			{
+			case BEGIN:
+				break;
+			case BUILD:
+				break;
+			case MANAGETRAINS:
+				break;
+			case SHOWBUILD:
+				break;
+			case SHOWPROFIT:
+				break;
+			default:
+				break;
+				
 			}
 			
 			popMatrix();

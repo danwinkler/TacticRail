@@ -1,5 +1,6 @@
 package com.danwink.tacticrail;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2i;
@@ -32,7 +33,7 @@ public class Train
 		this.owner = owner;
 	}
 	
-	public void render( RailClient g, RailMap map, float time, ArrayList<Point2i> points )
+	public void render( RailClient g, RailMap map, float time, ArrayList<Point2i> points, boolean selected )
 	{
 		float dx = 0, dy = 0;
 		if( points == null )
@@ -69,12 +70,18 @@ public class Train
 			g.translate( dx, dy );
 			g.color( g.players.get( owner ).color );
 			g.drawOval( -4, -4, 8, 8 );
+			
+			if( selected )
+			{
+				g.color( Color.RED );
+				g.drawOval( -6, -6, 12, 12 );
+			}
 		g.popMatrix();
 	}
 	
-	public void render( RailClient g, RailMap map )
+	public void render( RailClient g, RailMap map, boolean selected )
 	{
-		this.render( g, map, 0, null );
+		this.render( g, map, 0, null, selected );
 	}
 	
 	public enum TrainType
@@ -103,5 +110,11 @@ public class Train
 		this.pos.set( t.pos );
 		this.type = t.type;
 		this.cargo = t.cargo;
+	}
+	
+	public class TrainMove
+	{
+		int id;
+		ArrayList<Point2i> points = new ArrayList<Point2i>();
 	}
 }
