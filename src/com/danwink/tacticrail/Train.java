@@ -115,6 +115,14 @@ public class Train
 	public class TrainMove
 	{
 		int id;
-		ArrayList<Point2i> points = new ArrayList<Point2i>();
+		ArrayList<TrainAction> trainActions = new ArrayList<TrainAction>();
+	}
+	
+	public class TrainAction
+	{
+		Cargo toBuy;
+		Cargo toSell;
+		int amount;
+		Point2i move;
 	}
 }

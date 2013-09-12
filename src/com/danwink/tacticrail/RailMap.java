@@ -5,6 +5,7 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.util.ArrayList;
+import java.util.Stack;
 
 import javax.vecmath.Point2i;
 
@@ -178,5 +179,66 @@ public class RailMap
 	public int getCost( Point2i a, Point2i b )
 	{
 		return pointMap[a.x][a.y].type.cost + pointMap[b.x][b.y].type.cost;
+	}
+
+	public City getCity( Point2i p )
+	{
+		for( int i = 0; i < cities.size(); i++ )
+		{
+			if( cities.get( i ).pos.equals( p ) ) return cities.get( i );
+		}
+		return null;
+	}
+
+	public ArrayList<Point2i> findRoute( Point2i start, Point2i end, int player, boolean allowOthers )
+	{
+		ArrayList<ArrayList<Point2i>> possibleRoutes = new ArrayList<ArrayList<Point2i>>();
+		
+		findRouteHelper( start, end, player, possibleRoutes, new Stack<Point2i>(), allowOthers );
+		
+		int length = -1;
+		ArrayList<Point2i> shortest = null;
+		for( int i = 0; i < possibleRoutes.size(); i++ )
+		{
+			ArrayList<Point2i> route = possibleRoutes.get( i );
+			if( length == -1 || route.size() < length )
+			{
+				length = route.size(); shortest = route;
+			}
+		}
+		return shortest;
+	}
+	
+	private void findRouteHelper( Point2i start, Point2i end, int player, ArrayList<ArrayList<Point2i>> possibleRoutes, Stack<Point2i> visited, boolean allowOthers )
+	{
+		visited.push( start );
+		ArrayList<Point2i> nextInLine = new ArrayList<Point2i>();
+		for( int i = 0; i < rails.size(); i++ )
+		{
+			Railway r = rails.get( i );
+			if( !allowOthers && player != r.owner ) continue;
+			if( r.p1.equals( start ) )
+				nextInLine.add( r.p2 );
+			if( r.p2.equals( start ) )
+				nextInLine.add( r.p1 );
+		}
+		for( int i = 0; i < nextInLine.size(); i++ )
+		{
+			Point2i p = nextInLine.get( i );
+			if( p.equals( end ) )
+			{
+				visited.push( p );
+				possibleRoutes.add( new ArrayList<Point2i>( visited ) );
+				visited.pop();
+			}
+			else
+			{
+				if( !visited.contains( p ) )
+				{
+					findRouteHelper( p, end, player, possibleRoutes, visited, allowOthers );
+				}
+			}
+		}
+		visited.pop();
 	}
 }

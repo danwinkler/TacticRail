@@ -51,7 +51,9 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	int moneySpent = 0;
 	
 	//Manage Phase
-	Train selected;
+	Train selectedTrain;
+	City selectedCity;
+	ArrayList<Point2i> ownPath;
 	
 	public RailClient()
 	{
@@ -232,25 +234,45 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				
 				Point2i p = map.getClosestPoint( mw.x, mw.y );
 				
-				selected = null;
+				selectedTrain = null;
 				for( Train t : trains )
 				{
 					if( t.owner == player.id )
 					{
 						if( t.pos.equals( p ) )
 						{
-							selected = t;
+							selectedTrain = t;
 							return;
 						}
 					}
 				}
+				m.clicked = false;
 			}
 			if( m.rightClicked && m.y < getHeight() - 50 && m.y > 60 )
 			{
-				if( selected != null )
+				if( selectedTrain != null )
 				{
+					Point2D.Float mw = zt.transformPoint( new java.awt.Point( m.x, m.y ) );
 					
+					Point2i p = map.getClosestPoint( mw.x, mw.y );
+					
+					City c = map.getCity( p );
+					
+					if( c != null )
+					{
+						selectedCity = c;
+					}
+					else
+					{
+						selectedCity = null;
+						//TODO: FUCK FIND CITY
+						if( selectedCity != null && selectedTrain != null )
+						{
+							ownPath = map.findRoute( selectedTrain.pos, selectedCity.pos, player.id, false );
+						}
+					}
 				}
+				m.rightClicked = false;
 			}
 			break;
 		case SHOWBUILD:
@@ -307,7 +329,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			
 			for( int i = 0; i < trains.size(); i++ )
 			{
-				trains.get( i ).render( this, map, selected == trains.get( i ) );
+				trains.get( i ).render( this, map, selectedTrain == trains.get( i ) );
 			}
 			
 			if( !m.clicked && phase != GamePhase.BEGIN )
@@ -351,6 +373,16 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			case BUILD:
 				break;
 			case MANAGETRAINS:
+				if( ownPath != null )
+				{
+					for( int i = 0; i < ownPath.size()-1; i++ )
+					{
+						Point2i a = ownPath.get( i );
+						Point2i b = ownPath.get( i+1 );
+						color( Color.GREEN );
+						line( map.getPX( a.x, a.y ), map.getPY( a.x, a.y )+1, map.getPX( b.x, b.y ), map.getPY( b.x, b.y )+1 );
+					}
+				}
 				break;
 			case SHOWBUILD:
 				break;
