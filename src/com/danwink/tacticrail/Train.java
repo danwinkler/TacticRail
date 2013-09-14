@@ -112,17 +112,79 @@ public class Train
 		this.cargo = t.cargo;
 	}
 	
-	public class TrainMove
+	public static class TrainMove
 	{
 		int id;
 		ArrayList<TrainAction> trainActions = new ArrayList<TrainAction>();
+		
+		public TrainMove()
+		{
+			
+		}
+		
+		public TrainMove( int id )
+		{
+			this.id = id;
+		}
+
+		public void render( RailClient r )
+		{
+			Point2i lastPoint = null;
+			for( int i = 0; i < trainActions.size(); i++ )
+			{
+				TrainAction ac = trainActions.get( i );
+				if( ac.move != null )
+				{
+					if( lastPoint == null )
+					{
+						lastPoint = ac.move;
+					}
+					else
+					{
+						Point2i a = lastPoint;
+						Point2i b = ac.move;
+						r.color( Color.GREEN );
+						r.line( r.map.getPX( a.x, a.y ), r.map.getPY( a.x, a.y )+1, r.map.getPX( b.x, b.y ), r.map.getPY( b.x, b.y )+1 );
+						lastPoint = b;
+					}
+				}
+			}
+		}
+
+		public TrainAction getFirstMoveAction()
+		{
+			for( int i = 0; i < trainActions.size(); i++ )
+			{
+				if( trainActions.get( i ).move != null ) return trainActions.get( i );
+			}
+			return null;
+		}
+
+		public TrainAction getLastMoveAction()
+		{
+			for( int i = trainActions.size()-1; i >= 0; i-- )
+			{
+				if( trainActions.get( i ).move != null ) return trainActions.get( i );
+			}
+			return null;
+		}
 	}
 	
-	public class TrainAction
+	public static class TrainAction
 	{
 		Cargo toBuy;
 		Cargo toSell;
 		int amount;
 		Point2i move;
+		
+		public TrainAction()
+		{
+			
+		}
+		
+		public TrainAction( Point2i move )
+		{
+			this.move = new Point2i( move );
+		}
 	}
 }

@@ -23,6 +23,8 @@ public class RailClassRegisterer
 		Railway.class,
 		Train.class,
 		Train.TrainType.class,
+		Train.TrainMove.class,
+		Train.TrainType.class,
 		City.class,
 		Cargo.class,
 		

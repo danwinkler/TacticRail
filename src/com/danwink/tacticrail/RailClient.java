@@ -5,13 +5,17 @@ import java.awt.RenderingHints;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.vecmath.Point2i;
 import javax.vecmath.Vector2f;
 
 import com.danwink.dngf.DNGFClient;
+import com.danwink.tacticrail.Train.TrainAction;
+import com.danwink.tacticrail.Train.TrainMove;
 import com.phyloa.dlib.dui.AWTComponentEventMapper;
 import com.phyloa.dlib.dui.DButton;
+import com.phyloa.dlib.dui.DPanel;
 import com.phyloa.dlib.dui.DUI;
 import com.phyloa.dlib.dui.DUIElement;
 import com.phyloa.dlib.dui.DUIEvent;
@@ -35,8 +39,6 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	
 	DHashList<Integer, Train> trains = new DHashList<Integer, Train>();
 	
-	boolean firstFrame = true;
-	
 	DUI dui;
 	DButton finishedButton;
 	
@@ -53,7 +55,10 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	//Manage Phase
 	Train selectedTrain;
 	City selectedCity;
-	ArrayList<Point2i> ownPath;
+	HashMap<Integer, TrainMove> moves = new HashMap<Integer, TrainMove>();
+	DPanel manageButtons;
+	DButton buy;
+	DButton sell;
 	
 	public RailClient()
 	{
@@ -65,9 +70,28 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	
 	}
 	
+	//Called at beginning of game
 	public void clientStart()
 	{
+		zt = new ZoomTransform( canvas );
+		canvas.addMouseListener( zt );
+		canvas.addMouseMotionListener( zt );
+		canvas.addMouseWheelListener( zt );
 		
+		AWTComponentEventMapper dem = new AWTComponentEventMapper();
+		dem.register( canvas );
+		dui = new DUI( dem );
+		dui.addDUIListener( this );
+		finishedButton = new DButton( "Begin!", getWidth() - 100, getHeight() - 50, 100, 50 );
+		dui.add( finishedButton );
+		
+		manageButtons = new DPanel( 300, 30, 200, 30 );
+		buy = new DButton( "Buy from City", 0, 0, 100, 30 );
+		manageButtons.add( buy );
+		sell = new DButton( "Sell at City", 100, 0, 100, 30 );
+		manageButtons.add( sell );
+		
+		phaseStart = System.currentTimeMillis();
 	}
 
 	public void handleMessage( RailMessageType type, Object o )
@@ -141,25 +165,6 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 
 	public void update( float d )
 	{
-		if( firstFrame )
-		{
-			zt = new ZoomTransform( canvas );
-			canvas.addMouseListener( zt );
-			canvas.addMouseMotionListener( zt );
-			canvas.addMouseWheelListener( zt );
-			
-			AWTComponentEventMapper dem = new AWTComponentEventMapper();
-			dem.register( canvas );
-			dui = new DUI( dem );
-			dui.addDUIListener( this );
-			finishedButton = new DButton( "Begin!", getWidth() - 100, getHeight() - 50, 100, 50 );
-			dui.add( finishedButton );
-			
-			phaseStart = System.currentTimeMillis();
-			
-			firstFrame = false;
-		}
-		
 		//Update
 		dui.update();
 		
@@ -256,21 +261,37 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 					
 					Point2i p = map.getClosestPoint( mw.x, mw.y );
 					
-					City c = map.getCity( p );
+					selectedCity = map.getCity( p );
 					
-					if( c != null )
+					if( selectedCity == null )
 					{
-						selectedCity = c;
+						dui.remove( manageButtons );
 					}
 					else
 					{
-						selectedCity = null;
-						//TODO: FUCK FIND CITY
-						if( selectedCity != null && selectedTrain != null )
+						dui.add( manageButtons );
+					}
+					
+					if( selectedTrain != null )
+					{
+						if( !selectedTrain.pos.equals( p ) )
 						{
-							ownPath = map.findRoute( selectedTrain.pos, selectedCity.pos, player.id, false );
+							TrainMove move = moves.get( selectedTrain.id );
+							if( move == null )
+							{
+								moves.put( selectedTrain.id, move = new TrainMove( selectedTrain.id ) );
+							}
+							ArrayList<Point2i> path = map.findRoute( move.getLastMoveAction() == null ? selectedTrain.pos : move.getLastMoveAction().move, p, player.id, false );
+							if( path != null )
+							{
+								for( int i = 1; i < path.size(); i++ )
+								{
+									move.trainActions.add( new TrainAction( path.get( i ) ) );
+								}
+							}
 						}
 					}
+					
 				}
 				m.rightClicked = false;
 			}
@@ -373,14 +394,12 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			case BUILD:
 				break;
 			case MANAGETRAINS:
-				if( ownPath != null )
+				if( selectedTrain != null )
 				{
-					for( int i = 0; i < ownPath.size()-1; i++ )
+					TrainMove move = moves.get( selectedTrain.id );
+					if( move != null )
 					{
-						Point2i a = ownPath.get( i );
-						Point2i b = ownPath.get( i+1 );
-						color( Color.GREEN );
-						line( map.getPX( a.x, a.y ), map.getPY( a.x, a.y )+1, map.getPX( b.x, b.y ), map.getPY( b.x, b.y )+1 );
+						move.render( this );
 					}
 				}
 				break;
@@ -395,8 +414,6 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			
 			popMatrix();
 		}
-		
-		dui.render( this );
 		
 		color( 255, 240, 230 );
 		fillRect( 0, 0, getWidth()-60, 30 );
@@ -456,6 +473,8 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				text( timerText, 30 - timerTextSize.x*.5f, 30 - timerTextSize.y*.5f );
 			}
 		popMatrix();
+		
+		dui.render( this );
 	}
 	
 	public static void main( String[] args )
