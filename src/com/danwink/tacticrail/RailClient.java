@@ -15,7 +15,10 @@ import com.danwink.tacticrail.Train.TrainAction;
 import com.danwink.tacticrail.Train.TrainMove;
 import com.phyloa.dlib.dui.AWTComponentEventMapper;
 import com.phyloa.dlib.dui.DButton;
+import com.phyloa.dlib.dui.DDialog;
 import com.phyloa.dlib.dui.DPanel;
+import com.phyloa.dlib.dui.DText;
+import com.phyloa.dlib.dui.DTextBox;
 import com.phyloa.dlib.dui.DUI;
 import com.phyloa.dlib.dui.DUIElement;
 import com.phyloa.dlib.dui.DUIEvent;
@@ -477,6 +480,24 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 		dui.render( this );
 	}
 	
+	public void showBuySellDialog()
+	{
+		if( phase == GamePhase.MANAGETRAINS && selectedCity != null )
+		{
+			DDialog d = new DDialog( 300, 400 );
+			for( int i = 0; i < Cargo.values().length; i++ )
+			{
+				int y = 10 + i * 30;
+				d.add( new DText( Cargo.values()[i].toString(), 10, y ) );
+				DTextBox tb = new DTextBox( 100, y, 190, 20 );
+				tb.setText( Integer.toString( selectedCity.supplies[i] ) );
+				tb.setName( Cargo.values()[i].name() );
+				d.add( tb );
+			}
+			dui.showDialog( d, getWidth()/2 - 150, getHeight()/2 - 200 );
+		}
+	}
+	
 	public static void main( String[] args )
 	{
 		RailClient rc = new RailClient();
@@ -493,6 +514,17 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			if( e == finishedButton )
 			{
 				send( RailMessageType.CONTINUE, null );
+			}
+			if( phase == GamePhase.MANAGETRAINS )
+			{
+				if( e == buy )
+				{
+					showBuySellDialog();
+				}
+				if( e == sell )
+				{
+					showBuySellDialog();
+				}
 			}
 		}
 	}
