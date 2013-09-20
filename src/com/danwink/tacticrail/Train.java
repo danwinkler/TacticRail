@@ -176,6 +176,7 @@ public class Train
 		Cargo toSell;
 		int amount;
 		Point2i move;
+		Point2i city;
 		
 		public TrainAction()
 		{

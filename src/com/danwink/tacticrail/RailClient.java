@@ -16,6 +16,7 @@ import com.danwink.tacticrail.Train.TrainMove;
 import com.phyloa.dlib.dui.AWTComponentEventMapper;
 import com.phyloa.dlib.dui.DButton;
 import com.phyloa.dlib.dui.DDialog;
+import com.phyloa.dlib.dui.DDropDown;
 import com.phyloa.dlib.dui.DPanel;
 import com.phyloa.dlib.dui.DText;
 import com.phyloa.dlib.dui.DTextBox;
@@ -62,6 +63,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 	DPanel manageButtons;
 	DButton buy;
 	DButton sell;
+	boolean buying = false;
 	
 	public RailClient()
 	{
@@ -236,67 +238,70 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			break;
 		}
 		case MANAGETRAINS:
-			if( m.clicked && m.y < getHeight() - 50 && m.y > 60 )
+			if( !dui.dialogPresent() )
 			{
-				Point2D.Float mw = zt.transformPoint( new java.awt.Point( m.x, m.y ) );
-				
-				Point2i p = map.getClosestPoint( mw.x, mw.y );
-				
-				selectedTrain = null;
-				for( Train t : trains )
-				{
-					if( t.owner == player.id )
-					{
-						if( t.pos.equals( p ) )
-						{
-							selectedTrain = t;
-							return;
-						}
-					}
-				}
-				m.clicked = false;
-			}
-			if( m.rightClicked && m.y < getHeight() - 50 && m.y > 60 )
-			{
-				if( selectedTrain != null )
+				if( m.clicked && m.y < getHeight() - 50 && m.y > 60 )
 				{
 					Point2D.Float mw = zt.transformPoint( new java.awt.Point( m.x, m.y ) );
 					
 					Point2i p = map.getClosestPoint( mw.x, mw.y );
 					
-					selectedCity = map.getCity( p );
-					
-					if( selectedCity == null )
+					selectedTrain = null;
+					for( Train t : trains )
 					{
-						dui.remove( manageButtons );
-					}
-					else
-					{
-						dui.add( manageButtons );
-					}
-					
-					if( selectedTrain != null )
-					{
-						if( !selectedTrain.pos.equals( p ) )
+						if( t.owner == player.id )
 						{
-							TrainMove move = moves.get( selectedTrain.id );
-							if( move == null )
+							if( t.pos.equals( p ) )
 							{
-								moves.put( selectedTrain.id, move = new TrainMove( selectedTrain.id ) );
-							}
-							ArrayList<Point2i> path = map.findRoute( move.getLastMoveAction() == null ? selectedTrain.pos : move.getLastMoveAction().move, p, player.id, false );
-							if( path != null )
-							{
-								for( int i = 1; i < path.size(); i++ )
-								{
-									move.trainActions.add( new TrainAction( path.get( i ) ) );
-								}
+								selectedTrain = t;
+								return;
 							}
 						}
 					}
-					
+					m.clicked = false;
 				}
-				m.rightClicked = false;
+				if( m.rightClicked && m.y < getHeight() - 50 && m.y > 60 )
+				{
+					if( selectedTrain != null )
+					{
+						Point2D.Float mw = zt.transformPoint( new java.awt.Point( m.x, m.y ) );
+						
+						Point2i p = map.getClosestPoint( mw.x, mw.y );
+						
+						selectedCity = map.getCity( p );
+						
+						if( selectedCity == null )
+						{
+							dui.remove( manageButtons );
+						}
+						else
+						{
+							dui.add( manageButtons );
+						}
+						
+						if( selectedTrain != null )
+						{
+							if( !selectedTrain.pos.equals( p ) )
+							{
+								TrainMove move = moves.get( selectedTrain.id );
+								if( move == null )
+								{
+									moves.put( selectedTrain.id, move = new TrainMove( selectedTrain.id ) );
+								}
+								ArrayList<Point2i> path = map.findRoute( move.getLastMoveAction() == null ? selectedTrain.pos : move.getLastMoveAction().move, p, player.id, false );
+								if( path != null )
+								{
+									for( int i = 1; i < path.size(); i++ )
+									{
+										move.trainActions.add( new TrainAction( path.get( i ) ) );
+									}
+								}
+							}
+						}
+						
+					}
+					m.rightClicked = false;
+				}
 			}
 			break;
 		case SHOWBUILD:
@@ -390,6 +395,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				}
 			}
 			
+			//PHASE SPECIFIC MAP FEATURES
 			switch( phase )
 			{
 			case BEGIN:
@@ -417,7 +423,14 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			
 			popMatrix();
 		}
+	
+		//Bottom bar
+		color( 230, 230, 230 );
+		fillRect( 0, getHeight()-50, getWidth()-100, 50 );
+		color( 100, 100, 100 );
+		drawRect( 0, getHeight()-50, getWidth()-100, 50 );
 		
+		//Top bar
 		color( 255, 240, 230 );
 		fillRect( 0, 0, getWidth()-60, 30 );
 		color( 230, 140, 100 );
@@ -427,6 +440,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 		text( "Money: " + DMath.humanReadableNumber( player.money ), 10, 20 );
 		text( "Turn: " + turn, 160, 20 );
 		
+		//Second to top bar
 		color( 230, 240, 255 );
 		fillRect( 0, 30, getWidth()-60, 30 );
 		color( 100, 140, 230 );
@@ -444,6 +458,51 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			text( "Build Costs: " + DMath.humanReadableNumber( moneySpent ), 160, 50 );
 			break;
 		case MANAGETRAINS:
+			text( "Cargo Costs: " + DMath.humanReadableNumber( moneySpent ), 160, 50 );
+			
+			if( selectedTrain != null )
+			{
+				TrainMove move = moves.get( selectedTrain.id );
+				if( move != null )
+				{
+					color( 0 );
+					
+					float moveSize = getStringSize( "MOVE" ).x;
+					float buySize = getStringSize( "BUY" ).x;
+					float sellSize = getStringSize( "SELL" ).x;
+					
+					for( int i = 0; i < move.trainActions.size(); i++ )
+					{
+						TrainAction t = move.trainActions.get( i );
+						pushMatrix();
+							translate( 25 + i * 50, getHeight() - 50 );
+							if( t.move != null )
+							{
+								text( "MOVE", 25 - moveSize/2, 15 );
+								String pos = "(" + t.move.x + ", " + t.move.y + ")";
+								text( pos, 25 - getStringSize( pos ).x/2, 35 );	
+							}
+							else if( t.toBuy != null )
+							{
+								text( "BUY", 25 - buySize/2, 15 );
+								String cargo = t.toBuy.toString();
+								text( cargo, 25 - getStringSize( cargo ).x/2, 30 );
+								String amt = String.valueOf( t.amount );
+								text( amt, 25 - getStringSize( amt ).x/2, 45 );
+							}
+							else if( t.toSell != null )
+							{
+								text( "SELL", 25 - sellSize/2, 15 );
+								String cargo = t.toSell.toString();
+								text( cargo, 25 - getStringSize( cargo ).x/2, 30 );
+								String amt = String.valueOf( t.amount );
+								text( amt, 25 - getStringSize( amt ).x/2, 45 );
+							}
+						popMatrix();
+					}
+				}
+			}
+			
 			break;
 		case SHOWBUILD:
 			break;
@@ -480,7 +539,7 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 		dui.render( this );
 	}
 	
-	public void showBuySellDialog()
+	public void showBuySellDialog( boolean buying )
 	{
 		if( phase == GamePhase.MANAGETRAINS && selectedCity != null )
 		{
@@ -489,8 +548,8 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			{
 				int y = 10 + i * 30;
 				d.add( new DText( Cargo.values()[i].toString(), 10, y ) );
-				DTextBox tb = new DTextBox( 100, y, 190, 20 );
-				tb.setText( Integer.toString( selectedCity.supplies[i] ) );
+				DDropDown tb = new DDropDown( 100, y, 190, 20 );
+				tb.addItems( "0", "1000", "2000", "3000" );
 				tb.setName( Cargo.values()[i].name() );
 				d.add( tb );
 			}
@@ -519,13 +578,78 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 			{
 				if( e == buy )
 				{
-					showBuySellDialog();
+					showBuySellDialog( true );
+					buying = true;
 				}
-				if( e == sell )
+				else if( e == sell )
 				{
-					showBuySellDialog();
+					showBuySellDialog( false );
+					buying = false;
 				}
 			}
+		}
+		
+		if( e instanceof DDialog )
+		{
+			DDialog d = (DDialog)e;
+			if( phase == GamePhase.MANAGETRAINS && d.isConfirmed() )
+			{
+				int total = 0;
+				int[] quantity = new int[Cargo.values().length];
+				for( DUIElement el : d.getChildren() )
+				{
+					if( el instanceof DDropDown )
+					{
+						DDropDown tb = (DDropDown)el;
+						quantity[Cargo.valueOf( tb.getName() ).ordinal()] = Integer.parseInt( tb.getSelected().trim() );
+					}
+				}
+				for( int i = 0; i < quantity.length; i++ )
+				{
+					total += quantity[i] * (buying ? selectedCity.buyPrice( i ) : selectedCity.sellPrice( i ) );
+				}
+				
+				TrainMove move = moves.get( selectedTrain.id );
+				if( move == null )
+				{
+					moves.put( selectedTrain.id, move = new TrainMove( selectedTrain.id ) );
+				}
+				
+				if( buying )
+				{
+					if( total + moneySpent <= player.money )
+					{
+						moneySpent += total;
+						for( int i = 0; i < quantity.length; i++ )
+						{
+							if( quantity[i] != 0 )
+							{
+								TrainAction ta = new TrainAction();
+								ta.city = selectedCity.pos;
+								ta.amount = quantity[i];
+								ta.toBuy = Cargo.values()[i];
+								move.trainActions.add( ta );
+							}
+						}
+					}
+				}
+				else
+				{
+					moneySpent -= total;
+					for( int i = 0; i < quantity.length; i++ )
+					{
+						if( quantity[i] != 0 )
+						{
+							TrainAction ta = new TrainAction();
+							ta.city = selectedCity.pos;
+							ta.amount = quantity[i];
+							ta.toSell = Cargo.values()[i];
+							move.trainActions.add( ta );
+						}
+					}
+				}
+			}
+			m.clicked = false;
 		}
 	}
 
