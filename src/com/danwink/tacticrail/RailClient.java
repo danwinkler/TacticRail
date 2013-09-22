@@ -129,6 +129,11 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 				case MANAGETRAINS:
 					break;
 				case SHOWPROFIT:
+					send( RailMessageType.TRAINMANAGEMENT, moves );
+					moves.clear();
+					moneySpent = 0;
+					selectedTrain = null;
+					selectedCity = null;
 					break;
 				}
 				phase = newPhase;
@@ -622,6 +627,10 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 						moneySpent += total;
 						for( int i = 0; i < quantity.length; i++ )
 						{
+							if( move.trainActions.size() > selectedTrain.type.speed )
+							{
+								break;
+							}
 							if( quantity[i] != 0 )
 							{
 								TrainAction ta = new TrainAction();
@@ -638,6 +647,10 @@ public class RailClient extends DNGFClient<RailMessageType> implements DUIListen
 					moneySpent -= total;
 					for( int i = 0; i < quantity.length; i++ )
 					{
+						if( move.trainActions.size() > selectedTrain.type.speed )
+						{
+							break;
+						}
 						if( quantity[i] != 0 )
 						{
 							TrainAction ta = new TrainAction();

@@ -3,6 +3,8 @@ package com.danwink.tacticrail;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import javax.vecmath.Point2f;
 import javax.vecmath.Point2i;
 
@@ -31,6 +33,7 @@ public class RailClassRegisterer
 		Player.class,
 		
 		ArrayList.class,
+		HashMap.class,
 		
 		Polygon.class,
 		ComplexPolygon.class,

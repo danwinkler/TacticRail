@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.danwink.dngf.DNGFServer;
+import com.danwink.tacticrail.Train.TrainAction;
+import com.danwink.tacticrail.Train.TrainMove;
 import com.danwink.tacticrail.Train.TrainType;
 import com.phyloa.dlib.util.DHashList;
 import com.phyloa.dlib.util.DMath;
@@ -47,6 +49,7 @@ public class RailServer extends DNGFServer<RailMessageType>
 		case SETPLAYER:
 			break;
 		case BUILDREQUEST:
+		{
 			ArrayList<Railway> buildAttempt = (ArrayList<Railway>)message;
 			int price = Railway.getPrice( buildAttempt, map );
 			Player player = players.get( sender );
@@ -62,6 +65,41 @@ public class RailServer extends DNGFServer<RailMessageType>
 				player.sentRails = true;
 			}
 			break;
+		}
+		case TRAINMANAGEMENT:
+		{
+			HashMap<Integer, TrainMove> moves = (HashMap<Integer, TrainMove>)message;
+			for( int i = 0; i < trains.size(); i++ )
+			{
+				Train t = trains.getIndex( i );
+				TrainMove tm = moves.get( t.id );
+				if( tm != null )
+				{
+					for( int j = 0; j < tm.trainActions.size(); j++ )
+					{
+						TrainAction ta = tm.trainActions.get( j );
+						
+						if( ta.move != null )
+						{
+							t.pos.set( ta.move );
+						}
+						else if( ta.toBuy != null )
+						{
+							City c = map.getCity( ta.city );
+							int price = c.buyPrice( ta.toBuy.ordinal() ) * ta.amount;
+							players.get( sender ).money -= price;
+							t.cargo[ta.toBuy.ordinal()] += ta.amount;
+							c.supplies[ta.toBuy.ordinal()] -= ta.amount;
+							sendAll( RailMessageType.CITYUPDATE, c );
+						}
+					}
+				}
+			}
+			
+			//TODO: VERIFY THAT MOVE IS VALID
+			sendAll( RailMessageType.TRAINMANAGEMENT, moves );
+			break;
+		}
 		}
 	}
 
